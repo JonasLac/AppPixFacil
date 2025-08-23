@@ -4,7 +4,7 @@
 	"webDir": "dist",
 	"server": {
 		"url": "https://pix-facil.vercel.app",
-		"cleartext": false,
+		"cleartext": true,
 		"allowNavigation": [
 			"pix-facil.vercel.app"
 		]
