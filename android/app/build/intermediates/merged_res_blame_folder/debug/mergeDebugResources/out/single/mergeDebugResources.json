@@ -1,0 +1,70 @@
+[
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xxhdpi_ic_launcher_app.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xxhdpi/ic_launcher_app.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-hdpi_ic_launcher_app.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-hdpi/ic_launcher_app.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/xml_config.xml.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/xml/config.xml"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/xml_file_paths.xml.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/xml/file_paths.xml"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/drawable_splash.xml.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/drawable/splash.xml"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xhdpi_ic_launcher_app.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xhdpi/ic_launcher_app.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "app.lovable.pixfacilgo.app-debug-26:/mipmap-xxxhdpi_ic_launcher_app.png.flat",
+        "source": "app.lovable.pixfacilgo.app-main-28:/mipmap-xxxhdpi/ic_launcher_app.png"
+    }
+]

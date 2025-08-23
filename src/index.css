@@ -1,0 +1,272 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 220 13% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 18%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 13% 18%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 13% 46%;
+
+    --accent: 212 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 142 76% 36%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 220 13% 18%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 220 13% 18%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 142 76% 36%;
+
+    /* Enhanced Pix Design System */
+    --pix-green: 142 76% 36%;
+    --pix-green-dark: 142 76% 28%;
+    --pix-green-light: 142 60% 85%;
+    --pix-blue: 212 100% 50%;
+    --pix-blue-light: 212 100% 95%;
+    --pix-gray-50: 220 14% 98%;
+    --pix-gray-100: 220 14% 96%;
+    --pix-gray-200: 220 13% 91%;
+    --pix-gray-400: 220 13% 69%;
+    --pix-gray-600: 220 13% 46%;
+    --pix-gray-900: 220 13% 18%;
+
+    /* Enhanced spacing and layout */
+    --content-padding: 1.5rem;
+    --card-padding: 2rem;
+    --card-radius: 1.5rem;
+    
+    /* Typography scale */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--pix-green)) 0%, hsl(var(--pix-blue)) 100%);
+    --gradient-subtle: linear-gradient(135deg, hsl(var(--pix-green-light)) 0%, hsl(var(--pix-blue-light)) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 355 7% 97%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 142 76% 36%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Enhanced Pix Design System Classes */
+.pix-card {
+  @apply bg-card rounded-2xl sm:rounded-3xl shadow-lg border-0 p-4 sm:p-6 lg:p-8 transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1;
+}
+
+.pix-card-small {
+  @apply bg-card rounded-xl sm:rounded-2xl shadow-md border-0 p-3 sm:p-4 lg:p-6 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-0.5;
+}
+
+.pix-gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.pix-gradient-bg {
+  background: var(--gradient-primary);
+}
+
+.pix-gradient-subtle {
+  background: var(--gradient-subtle);
+}
+
+/* Typography Classes */
+.pix-heading-1 {
+  @apply text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground;
+}
+
+.pix-heading-2 {
+  @apply text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground;
+}
+
+.pix-heading-3 {
+  @apply text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight text-foreground;
+}
+
+.pix-heading-4 {
+  @apply text-base sm:text-lg lg:text-xl font-semibold text-foreground;
+}
+
+.pix-body-large {
+  @apply text-lg text-muted-foreground leading-relaxed;
+}
+
+.pix-body {
+  @apply text-base text-muted-foreground leading-relaxed;
+}
+
+.pix-caption {
+  @apply text-sm text-muted-foreground;
+}
+
+.pix-value {
+  @apply text-2xl font-bold tracking-tight;
+  color: hsl(var(--pix-green-dark));
+}
+
+.pix-value-large {
+  @apply text-4xl font-bold tracking-tight;
+  color: hsl(var(--pix-green-dark));
+}
+
+/* Color Classes */
+.text-pix-green {
+  color: hsl(var(--pix-green));
+}
+
+.text-pix-green-dark {
+  color: hsl(var(--pix-green-dark));
+}
+
+.text-pix-blue {
+  color: hsl(var(--pix-blue));
+}
+
+.bg-pix-green {
+  background-color: hsl(var(--pix-green));
+}
+
+.bg-pix-blue {
+  background-color: hsl(var(--pix-blue));
+}
+
+.bg-pix-gradient-light {
+  background: var(--gradient-subtle);
+}
+
+/* Interactive Elements */
+.pix-button-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:scale-105 focus:scale-105 active:scale-95;
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.pix-button-primary:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.pix-button-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-2xl border-2 px-6 py-3 text-sm font-semibold transition-all duration-200 hover:scale-105 focus:scale-105 active:scale-95;
+  border-color: hsl(var(--pix-green));
+  color: hsl(var(--pix-green));
+  background: transparent;
+}
+
+.pix-button-secondary:hover {
+  background-color: hsl(var(--pix-green));
+  color: white;
+}
+
+/* Loading and Animation Classes */
+.loading-pulse {
+  @apply animate-pulse-slow;
+}
+
+.hover-scale {
+  @apply transition-transform duration-200 hover:scale-105;
+}
+
+.story-link {
+  @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
+}
+
+/* Mobile-first responsive animations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,3 @@
+app.lovable.pixfacilgo.test
+style WhiteBackgroundDialogTheme
+style WhiteBackgroundTheme
