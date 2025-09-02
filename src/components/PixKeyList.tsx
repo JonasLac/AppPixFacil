@@ -3,20 +3,22 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Share, QrCode, Star, Trash2 } from "lucide-react";
+import { Share, QrCode, Star, Trash2, Pencil } from "lucide-react";
 import { PixKey } from "./PixKeyForm";
 import SearchAndFilter from "./SearchAndFilter";
 import ConfirmationDialog from "./ConfirmationDialog";
 import ShareActions from "./ShareActions";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface PixKeyListProps {
   keys: PixKey[];
   onDeleteKey: (id: string) => void;
   onGenerateQR: (key: PixKey) => void;
   onSetPrimary: (id: string) => void;
+  onEditKey?: (key: PixKey) => void;
 }
 
-const PixKeyList = ({ keys, onDeleteKey, onGenerateQR, onSetPrimary }: PixKeyListProps) => {
+const PixKeyList = ({ keys, onDeleteKey, onGenerateQR, onSetPrimary, onEditKey }: PixKeyListProps) => {
   const [filteredKeys, setFilteredKeys] = useState<PixKey[]>(keys);
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; keyId: string; keyName: string }>({
     open: false,
@@ -138,54 +140,101 @@ const PixKeyList = ({ keys, onDeleteKey, onGenerateQR, onSetPrimary }: PixKeyLis
                     <Badge className={getTypeColor(key.type)}>
                       {getTypeLabel(key.type)}
                     </Badge>
-                    <span className="font-medium text-foreground">{key.label}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="font-medium text-foreground truncate max-w-[180px] sm:max-w-[220px] md:max-w-[300px]">{key.label}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{key.label}</TooltipContent>
+                    </Tooltip>
                     {key.isPrimary && (
-                      <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                        <Star className="w-3 h-3 mr-1" />
-                        Principal
-                      </Badge>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                            <Star className="w-3 h-3 mr-1" />
+                            Principal
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>Chave principal</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground font-mono">
-                    {maskValue(key.type, key.value)}
-                  </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-sm text-muted-foreground font-mono truncate max-w-[240px] sm:max-w-[320px] md:max-w-[420px]">
+                        {maskValue(key.type, key.value)}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent>{maskValue(key.type, key.value)}</TooltipContent>
+                  </Tooltip>
                   <p className="text-xs text-muted-foreground mt-1">
                     Criada em {new Date(key.createdAt).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => onGenerateQR(key)}
-                    variant="gradient"
-                    className="text-xs px-2 py-1"
-                  >
-                    <QrCode className="w-3 h-3 mr-1" />
-                    QR Code
-                  </Button>
-                  
-                  {!key.isPrimary && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onSetPrimary(key.id)}
-                      className="text-xs px-2 py-1"
-                    >
-                      <Star className="w-3 h-3 mr-1" />
-                      Principal
-                    </Button>
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 min-w-0">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        onClick={() => onGenerateQR(key)}
+                        variant="gradient"
+                        className="text-xs px-2 py-1"
+                      >
+                        <QrCode className="w-3 h-3 mr-1" />
+                        QR Code
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Gerar QR Code</TooltipContent>
+                  </Tooltip>
+
+                  {onEditKey && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onEditKey(key)}
+                          className="text-xs px-2 py-1"
+                        >
+                          <Pencil className="w-3 h-3 mr-1" />
+                          Editar
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Editar chave</TooltipContent>
+                    </Tooltip>
                   )}
                   
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDeleteClick(key)}
-                    className="text-xs px-2 py-1 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Excluir
-                  </Button>
+                  {!key.isPrimary && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onSetPrimary(key.id)}
+                          className="text-xs px-2 py-1"
+                        >
+                          <Star className="w-3 h-3 mr-1" />
+                          Principal
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Definir como principal</TooltipContent>
+                    </Tooltip>
+                  )}
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDeleteClick(key)}
+                        className="text-xs px-2 py-1 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-3 h-3 mr-1" />
+                        Excluir
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Excluir chave</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </CardContent>

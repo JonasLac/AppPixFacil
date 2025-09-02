@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,31 +23,27 @@ const EnhancedQRGenerator = ({ selectedKey, onBack, onQRGenerated }: EnhancedQRG
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [currentAmount, setCurrentAmount] = useState("");
   const [currentDescription, setCurrentDescription] = useState("");
+  const qrSectionRef = useRef<HTMLDivElement | null>(null);
 
   const handleGenerateQR = (amount: string, description: string) => {
     const brCode = generateBRCode(selectedKey, amount, description);
-    console.log("BR Code gerado:", brCode);
-    console.log("Tamanho do BR Code:", brCode.length);
-    
     const qrCodeUrl = generateQRCodeUrl(brCode);
-    
+
     setQrCode(qrCodeUrl);
     setCurrentAmount(amount);
     setCurrentDescription(description);
-    
-    // Chama o callback para salvar no histórico
-    if (onQRGenerated) {
-      onQRGenerated({
-        qrCode: qrCodeUrl,
-        pixCode: brCode,
-        amount,
-        description
-      });
-    }
-    
+
+    // Notifica app para registrar histórico/telemetria
+    onQRGenerated?.({
+      qrCode: qrCodeUrl,
+      pixCode: brCode,
+      amount,
+      description,
+    });
+
     toast({
-      title: "✅ QR Code gerado com sucesso!",
-      description: "Seu QR Code foi criado e adicionado ao histórico",
+      title: "QR Code gerado!",
+      description: "Seu QR Code está pronto para pagamento",
     });
   };
 
@@ -57,26 +53,44 @@ const EnhancedQRGenerator = ({ selectedKey, onBack, onQRGenerated }: EnhancedQRG
     setCurrentDescription("");
   };
 
-  const getTypeLabel = (type: string) => {
-    const labels: { [key: string]: string } = {
-      cpf: "CPF",
-      cnpj: "CNPJ", 
-      email: "Email",
-      phone: "Telefone",
-      random: "Aleatória"
-    };
-    return labels[type] || type;
+  useEffect(() => {
+    if (qrCode && qrSectionRef.current) {
+      qrSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [qrCode]);
+
+  const getTypeColor = (type: PixKey["type"]) => {
+    switch (type) {
+      case "cpf":
+        return "bg-blue-100 text-blue-800";
+      case "cnpj":
+        return "bg-purple-100 text-purple-800";
+      case "email":
+        return "bg-green-100 text-green-800";
+      case "phone":
+        return "bg-yellow-100 text-yellow-800";
+      case "random":
+        return "bg-pink-100 text-pink-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
-  const getTypeColor = (type: string) => {
-    const colors: { [key: string]: string } = {
-      cpf: "bg-blue-100 text-blue-800",
-      cnpj: "bg-purple-100 text-purple-800",
-      email: "bg-green-100 text-green-800", 
-      phone: "bg-orange-100 text-orange-800",
-      random: "bg-gray-100 text-gray-800"
-    };
-    return colors[type] || "bg-gray-100 text-gray-800";
+  const getTypeLabel = (type: PixKey["type"]) => {
+    switch (type) {
+      case "cpf":
+        return "CPF";
+      case "cnpj":
+        return "CNPJ";
+      case "email":
+        return "E-mail";
+      case "phone":
+        return "Telefone";
+      case "random":
+        return "Aleatória";
+      default:
+        return type;
+    }
   };
 
   return (
@@ -106,13 +120,15 @@ const EnhancedQRGenerator = ({ selectedKey, onBack, onQRGenerated }: EnhancedQRG
       <EnhancedPaymentForm onGenerateQR={handleGenerateQR} />
 
       {qrCode && (
-        <QRDisplay
-          qrCodeUrl={qrCode}
-          amount={currentAmount}
-          description={currentDescription}
-          selectedKey={selectedKey}
-          onNewQRCode={handleNewQRCode}
-        />
+        <div ref={qrSectionRef} aria-label="Seção do QR Code">
+          <QRDisplay
+            qrCodeUrl={qrCode}
+            amount={currentAmount}
+            description={currentDescription}
+            selectedKey={selectedKey}
+            onNewQRCode={handleNewQRCode}
+          />
+        </div>
       )}
     </div>
   );

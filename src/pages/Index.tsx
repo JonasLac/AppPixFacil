@@ -12,12 +12,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnimatedCard } from "@/components/ui/animated-card";
 import { QrCode, Share, User, Home, Plus, History, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { usePixStore, PixKey } from "@/hooks/usePixStore";
+import { usePixStore } from "@/hooks/usePixStore";
+import type { PixKey as StorePixKey, QRCodeHistory } from "@/hooks/usePixStore";
+import type { PixKey as FormPixKey } from "@/components/PixKeyForm";
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [currentView, setCurrentView] = useState<"dashboard" | "keys" | "add-key" | "generate-qr" | "history">("dashboard");
-  const [selectedKey, setSelectedKey] = useState<PixKey | null>(null);
+  const [currentView, setCurrentView] = useState<"dashboard" | "keys" | "add-key" | "edit-key" | "generate-qr" | "history">("dashboard");
+  const [selectedKey, setSelectedKey] = useState<FormPixKey | null>(null);
+  const [editingKey, setEditingKey] = useState<FormPixKey | null>(null);
   
   // Use Zustand store instead of local state
   const {
@@ -30,7 +33,9 @@ const Index = () => {
     addQRHistory,
     updateQRReceived,
     cancelQR,
-    getQRHistory
+    getQRHistory,
+    deleteQRHistory,
+    updatePixKey,
   } = usePixStore();
 
   // Verificar se deve ir para o dashboard via query params
@@ -43,7 +48,7 @@ const Index = () => {
   }, [searchParams, setSearchParams]);
 
   // Sincronizar mudanças de view com URL
-  const handleViewChange = (newView: "dashboard" | "keys" | "add-key" | "generate-qr" | "history") => {
+  const handleViewChange = (newView: "dashboard" | "keys" | "add-key" | "edit-key" | "generate-qr" | "history") => {
     setCurrentView(newView);
     if (newView !== 'dashboard' && newView !== 'keys' && newView !== 'history') {
       setSearchParams({ view: newView });
@@ -52,9 +57,9 @@ const Index = () => {
     }
   };
 
-  const handleSavePixKey = (newKey: any) => {
-    const storeKey = {
-      type: newKey.type as 'cpf' | 'cnpj' | 'email' | 'phone' | 'random' | 'manual',
+  const handleSavePixKey = (newKey: Omit<FormPixKey, 'id' | 'createdAt'>) => {
+    const storeKey: Omit<StorePixKey, 'id' | 'createdAt'> = {
+      type: newKey.type as StorePixKey['type'],
       value: newKey.value,
       name: newKey.label,
       isPrimary: newKey.isPrimary || false
@@ -84,11 +89,8 @@ const Index = () => {
     });
   };
 
-  const handleGenerateQR = (key: any) => {
-    setSelectedKey({
-      ...key,
-      label: key.name || key.label
-    });
+  const handleGenerateQR = (key: FormPixKey) => {
+    setSelectedKey(key);
     handleViewChange("generate-qr");
   };
 
@@ -99,7 +101,7 @@ const Index = () => {
     description: string;
   }) => {
     if (selectedKey) {
-      const keyName = (selectedKey as any).name || (selectedKey as any).label || 'Chave Pix';
+      const keyName = selectedKey.label;
       addQRHistory({
         pixKeyId: selectedKey.id,
         pixKeyValue: selectedKey.value,
@@ -124,17 +126,26 @@ const Index = () => {
     });
   };
 
-  const handleViewQRFromHistory = (qr: any) => {
+  const handleViewQRFromHistory = (qr: QRCodeHistory) => {
     // Find the corresponding key for the QR and convert to component format
     const storeKey = pixKeys.find(k => k.id === qr.pixKeyId);
     if (storeKey) {
-      const componentKey = {
-        ...storeKey,
-        label: storeKey.name
+      const componentKey: FormPixKey = {
+        id: storeKey.id,
+        type: storeKey.type,
+        value: storeKey.value,
+        label: storeKey.name,
+        isPrimary: storeKey.isPrimary,
+        createdAt: storeKey.createdAt,
       };
       setSelectedKey(componentKey);
       handleViewChange("generate-qr");
     }
+  };
+
+  const handleEditPixKey = (key: FormPixKey) => {
+    setEditingKey(key);
+    handleViewChange('edit-key');
   };
 
   const primaryKey = getPrimaryKey();
@@ -149,31 +160,82 @@ const Index = () => {
           />
         );
       
+      case "edit-key":
+        return (
+          <PixKeyForm
+            mode="edit"
+            initialKey={editingKey}
+            onUpdate={(id, updated) => {
+              // Converter label -> name para o store
+              updatePixKey(id, {
+                type: updated.type as StorePixKey['type'],
+                value: updated.value,
+                name: updated.label,
+                isPrimary: updated.isPrimary,
+              });
+              setEditingKey(null);
+              handleViewChange('keys');
+            }}
+            onCancel={() => {
+              setEditingKey(null);
+              handleViewChange('keys');
+            }}
+            // onSave não é usado em modo edit, mas o componente exige a prop
+            onSave={() => {}}
+          />
+        );
+      
       case "keys":
         return (
           <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
               <h2 className="pix-heading-2">Minhas Chaves Pix</h2>
               <Button 
-                onClick={() => handleViewChange("add-key")}
-                variant="gradient"
-                className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                onClick={() => {
+                  if (pixKeys.length === 0) {
+                    handleViewChange("add-key");
+                    return;
+                  }
+                  if (primaryKey) {
+                    const componentKey: FormPixKey = {
+                      id: primaryKey.id,
+                      type: primaryKey.type,
+                      value: primaryKey.value,
+                      label: primaryKey.name,
+                      isPrimary: primaryKey.isPrimary,
+                      createdAt: primaryKey.createdAt,
+                    };
+                    setSelectedKey(componentKey);
+                    handleViewChange("generate-qr");
+                  } else {
+                    toast({
+                      title: "Selecione uma chave",
+                      description: "Use o botão QR na linha da chave ou defina uma chave principal para gerar rapidamente.",
+                    });
+                  }
+                }}
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[2.5rem] min-w-0"
               >
-                <Plus className="w-4 h-4" />
-                Nova Chave
+                <QrCode className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate max-w-full">
+                  {pixKeys.length === 0 ? "Cadastre uma chave" : "Gerar QR Code"}
+                </span>
               </Button>
             </div>
             <PixKeyList
               keys={pixKeys.map(key => ({
-                ...key,
-                label: key.name
+                id: key.id,
+                type: key.type,
+                value: key.value,
+                label: key.name,
+                isPrimary: key.isPrimary,
+                createdAt: key.createdAt,
               }))}
               onDeleteKey={handleDeleteKey}
-              onGenerateQR={(key) => handleGenerateQR({
-                ...key,
-                name: key.label
-              })}
+              onGenerateQR={handleGenerateQR}
               onSetPrimary={handleSetPrimary}
+              onEditKey={handleEditPixKey}
             />
           </div>
         );
@@ -192,6 +254,7 @@ const Index = () => {
               onUpdateReceived={handleUpdateQRReceived}
               onCancelQR={cancelQR}
               onViewQR={handleViewQRFromHistory}
+              onDeleteQR={deleteQRHistory}
             />
           </div>
         );
@@ -201,10 +264,7 @@ const Index = () => {
           <div className="space-y-8">
             <h2 className="pix-heading-2">Gerar QR Code</h2>
             <EnhancedQRGenerator
-              selectedKey={{
-                ...selectedKey,
-                label: (selectedKey as any).name || (selectedKey as any).label || 'Chave Pix'
-              }}
+              selectedKey={selectedKey}
               onBack={() => handleViewChange("keys")}
               onQRGenerated={handleQRGenerated}
             />
@@ -226,8 +286,12 @@ const Index = () => {
             {primaryKey && (
               <PrimaryKeyCard 
                 primaryKey={{
-                  ...primaryKey,
-                  label: primaryKey.name
+                  id: primaryKey.id,
+                  type: primaryKey.type,
+                  value: primaryKey.value,
+                  label: primaryKey.name,
+                  isPrimary: primaryKey.isPrimary,
+                  createdAt: primaryKey.createdAt,
                 }}
                 onGenerateQR={handleGenerateQR}
               />
@@ -294,11 +358,11 @@ const Index = () => {
                   <Button 
                     onClick={() => handleViewChange(pixKeys.length === 0 ? "add-key" : "keys")}
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[2.5rem]"
+                    className="w-full flex items-center justify-center gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[2.5rem] min-w-0"
                     disabled={pixKeys.length === 0}
                   >
                     <QrCode className="w-4 h-4 flex-shrink-0" />
-                    <span className="whitespace-nowrap">
+                    <span className="truncate max-w-full">
                       {pixKeys.length === 0 ? "Cadastre uma chave" : "Gerar QR Code"}
                     </span>
                   </Button>
@@ -372,7 +436,7 @@ const Index = () => {
             <span className="truncate">Dashboard</span>
           </Button>
           <Button
-            variant={currentView === "keys" || currentView === "add-key" ? "gradient" : "ghost"}
+            variant={currentView === "keys" || currentView === "add-key" || currentView === 'edit-key' ? "gradient" : "ghost"}
             onClick={() => handleViewChange("keys")}
             className="flex items-center justify-center gap-2 rounded-xl text-sm px-3 py-2 min-w-0"
           >

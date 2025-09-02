@@ -116,7 +116,7 @@ export class PixService {
     // Validar dígitos verificadores
     let length = cnpj.length - 2;
     let numbers = cnpj.substring(0, length);
-    let digits = cnpj.substring(length);
+    const digits = cnpj.substring(length);
     let sum = 0;
     let pos = length - 7;
     
@@ -125,8 +125,8 @@ export class PixService {
       if (pos < 2) pos = 9;
     }
     
-    let result = sum % 11 < 2 ? 0 : 11 - sum % 11;
-    if (result !== parseInt(digits.charAt(0))) return false;
+    const result1 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (result1 !== parseInt(digits.charAt(0))) return false;
     
     length = length + 1;
     numbers = cnpj.substring(0, length);
@@ -138,8 +138,8 @@ export class PixService {
       if (pos < 2) pos = 9;
     }
     
-    result = sum % 11 < 2 ? 0 : 11 - sum % 11;
-    return result === parseInt(digits.charAt(1));
+    const result2 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    return result2 === parseInt(digits.charAt(1));
   }
 
   private static isValidEmail(email: string): boolean {

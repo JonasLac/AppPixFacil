@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,13 +20,30 @@ export interface PixKey {
 interface PixKeyFormProps {
   onSave: (pixKey: Omit<PixKey, 'id' | 'createdAt'>) => void;
   onCancel: () => void;
+  mode?: 'create' | 'edit';
+  initialKey?: PixKey | null;
+  onUpdate?: (id: string, pixKey: Omit<PixKey, 'id' | 'createdAt'>) => void;
 }
 
-const PixKeyForm = ({ onSave, onCancel }: PixKeyFormProps) => {
+const PixKeyForm = ({ onSave, onCancel, mode = 'create', initialKey = null, onUpdate }: PixKeyFormProps) => {
   const [type, setType] = useState("");
   const [value, setValue] = useState("");
   const [label, setLabel] = useState("");
   const [isPrimary, setIsPrimary] = useState(false);
+
+  useEffect(() => {
+    if (initialKey) {
+      setType(initialKey.type ?? "");
+      setValue(initialKey.value ?? "");
+      setLabel(initialKey.label ?? "");
+      setIsPrimary(Boolean(initialKey.isPrimary));
+    } else {
+      setType("");
+      setValue("");
+      setLabel("");
+      setIsPrimary(false);
+    }
+  }, [initialKey]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,11 +85,21 @@ const PixKeyForm = ({ onSave, onCancel }: PixKeyFormProps) => {
       return;
     }
 
-    onSave({ type, value, label, isPrimary });
-    toast({
-      title: "Sucesso!",
-      description: "Chave Pix cadastrada com sucesso",
-    });
+    const payload = { type, value, label, isPrimary };
+
+    if (mode === 'edit' && initialKey && onUpdate) {
+      onUpdate(initialKey.id, payload);
+      toast({
+        title: "✅ Chave atualizada",
+        description: "As alterações foram salvas com sucesso",
+      });
+    } else {
+      onSave(payload);
+      toast({
+        title: "Sucesso!",
+        description: "Chave Pix cadastrada com sucesso",
+      });
+    }
   };
 
   const getPlaceholder = () => {
@@ -95,7 +122,7 @@ const PixKeyForm = ({ onSave, onCancel }: PixKeyFormProps) => {
   return (
     <Card className="animate-fade-in">
       <CardHeader>
-        <CardTitle className="text-lg">Nova Chave Pix</CardTitle>
+        <CardTitle className="text-lg">{mode === 'edit' ? 'Editar Chave Pix' : 'Nova Chave Pix'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -150,7 +177,7 @@ const PixKeyForm = ({ onSave, onCancel }: PixKeyFormProps) => {
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <Button type="submit" className="w-full sm:flex-1 bg-pix-gradient hover:bg-pix-green-dark">
-              Salvar Chave
+              {mode === 'edit' ? 'Salvar alterações' : 'Salvar Chave'}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:flex-1">
               Cancelar

@@ -6,11 +6,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { X, AlertTriangle } from "lucide-react";
 import { QRCodeHistory } from "@/hooks/usePixStore";
+import { toast } from "@/hooks/use-toast";
 
 interface CancelDialogProps {
   qr: QRCodeHistory | null;
@@ -21,15 +23,29 @@ interface CancelDialogProps {
 
 const CancelDialog = ({ qr, open, onOpenChange, onConfirm }: CancelDialogProps) => {
   const [reason, setReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
 
-  const handleConfirm = () => {
-    if (!qr || !reason.trim()) return;
-    onConfirm(qr.id, reason.trim());
-    setReason("");
-    onOpenChange(false);
+  const handleConfirm = async () => {
+    if (!qr || !reason.trim()) {
+      toast({
+        title: "Informe o motivo",
+        description: "O motivo do cancelamento é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      setIsCancelling(true);
+      await Promise.resolve(onConfirm(qr.id, reason.trim()));
+      setReason("");
+      onOpenChange(false);
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   const handleCancel = () => {
+    if (isCancelling) return;
     setReason("");
     onOpenChange(false);
   };
@@ -79,6 +95,7 @@ const CancelDialog = ({ qr, open, onOpenChange, onConfirm }: CancelDialogProps) 
               onChange={(e) => setReason(e.target.value)}
               rows={3}
               className="resize-none"
+              disabled={isCancelling}
             />
             <p className="text-xs text-muted-foreground">
               Descreva brevemente o motivo do cancelamento
@@ -90,17 +107,20 @@ const CancelDialog = ({ qr, open, onOpenChange, onConfirm }: CancelDialogProps) 
               variant="outline"
               onClick={handleCancel}
               className="flex-1"
+              disabled={isCancelling}
             >
               Cancelar
             </Button>
-            <Button
+            <LoadingButton
               variant="destructive"
               onClick={handleConfirm}
-              disabled={!reason.trim()}
+              disabled={!reason.trim() || isCancelling}
               className="flex-1"
+              loading={isCancelling}
+              loadingText="Cancelando..."
             >
               Confirmar Cancelamento
-            </Button>
+            </LoadingButton>
           </div>
         </div>
       </DialogContent>

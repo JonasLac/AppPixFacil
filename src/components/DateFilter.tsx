@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface DateFilterProps {
   date: Date | undefined;
@@ -23,38 +24,52 @@ const DateFilter = ({ date, onDateChange }: DateFilterProps) => {
           Filtrar por data
         </label>
         {date && (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => onDateChange(undefined)}
-            className="h-8 w-8 p-0 rounded-full bg-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground border border-destructive/30 hover:border-destructive transition-all duration-200 shadow-sm"
-            title="Limpar data selecionada"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onDateChange(undefined)}
+                className="h-8 w-8 p-0 rounded-full bg-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground border border-destructive/30 hover:border-destructive transition-all duration-200 shadow-sm"
+                title="Limpar data selecionada"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Limpar data</TooltipContent>
+          </Tooltip>
         )}
       </div>
       
       <div className="flex flex-col sm:flex-row gap-2">
         <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full sm:w-[240px] justify-start text-left font-normal h-10",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-              {date ? (
-                <span className="truncate">
-                  {format(date, "dd/MM/yyyy", { locale: ptBR })}
-                </span>
-              ) : (
-                <span>Selecionar data</span>
-              )}
-            </Button>
-          </PopoverTrigger>
+          {/* Composição dos triggers para mostrar tooltip sem quebrar o Popover */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full sm:w-[240px] justify-start text-left font-normal h-10",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                  {date ? (
+                    <span className="truncate">
+                      {format(date, "dd/MM/yyyy", { locale: ptBR })}
+                    </span>
+                  ) : (
+                    <span>Selecionar data</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              {date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
+            </TooltipContent>
+          </Tooltip>
+
           <PopoverContent 
             className="w-auto p-0 z-50 bg-popover border shadow-lg" 
             align="start"

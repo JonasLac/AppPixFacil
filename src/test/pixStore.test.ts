@@ -9,7 +9,7 @@ describe('PixStore', () => {
 
   describe('PixKey Management', () => {
     it('should add a new pix key', () => {
-      const { addPixKey, pixKeys } = usePixStore.getState();
+      const { addPixKey } = usePixStore.getState();
       
       addPixKey({
         type: 'cpf',
@@ -18,6 +18,7 @@ describe('PixStore', () => {
         isPrimary: true,
       });
 
+      const { pixKeys } = usePixStore.getState();
       expect(pixKeys).toHaveLength(1);
       expect(pixKeys[0]).toMatchObject({
         type: 'cpf',
@@ -30,7 +31,7 @@ describe('PixStore', () => {
     });
 
     it('should set only one primary key', () => {
-      const { addPixKey, pixKeys } = usePixStore.getState();
+      const { addPixKey } = usePixStore.getState();
       
       // Adicionar primeira chave como primária
       addPixKey({
@@ -48,13 +49,14 @@ describe('PixStore', () => {
         isPrimary: true,
       });
 
+      const { pixKeys } = usePixStore.getState();
       const primaryKeys = pixKeys.filter(key => key.isPrimary);
       expect(primaryKeys).toHaveLength(1);
       expect(primaryKeys[0].type).toBe('email');
     });
 
     it('should delete a pix key', () => {
-      const { addPixKey, deletePixKey, pixKeys } = usePixStore.getState();
+      const { addPixKey, deletePixKey } = usePixStore.getState();
       
       addPixKey({
         type: 'cpf',
@@ -63,14 +65,15 @@ describe('PixStore', () => {
         isPrimary: false,
       });
 
-      const keyId = pixKeys[0].id;
+      const keyId = usePixStore.getState().pixKeys[0].id;
       deletePixKey(keyId);
 
+      const { pixKeys } = usePixStore.getState();
       expect(pixKeys).toHaveLength(0);
     });
 
     it('should update a pix key', () => {
-      const { addPixKey, updatePixKey, pixKeys } = usePixStore.getState();
+      const { addPixKey, updatePixKey } = usePixStore.getState();
       
       addPixKey({
         type: 'cpf',
@@ -79,15 +82,16 @@ describe('PixStore', () => {
         isPrimary: false,
       });
 
-      const keyId = pixKeys[0].id;
+      const keyId = usePixStore.getState().pixKeys[0].id;
       updatePixKey(keyId, { name: 'João Santos', isPrimary: true });
 
+      const { pixKeys } = usePixStore.getState();
       expect(pixKeys[0].name).toBe('João Santos');
       expect(pixKeys[0].isPrimary).toBe(true);
     });
 
     it('should get primary key', () => {
-      const { addPixKey, getPrimaryKey } = usePixStore.getState();
+      const { addPixKey } = usePixStore.getState();
       
       addPixKey({
         type: 'cpf',
@@ -96,7 +100,7 @@ describe('PixStore', () => {
         isPrimary: true,
       });
 
-      const primaryKey = getPrimaryKey();
+      const primaryKey = usePixStore.getState().getPrimaryKey();
       expect(primaryKey).toBeDefined();
       expect(primaryKey?.isPrimary).toBe(true);
     });
@@ -104,7 +108,7 @@ describe('PixStore', () => {
 
   describe('Transaction Management', () => {
     it('should add a new transaction', () => {
-      const { addPixKey, addTransaction, transactions, pixKeys } = usePixStore.getState();
+      const { addPixKey, addTransaction } = usePixStore.getState();
       
       // Primeiro adicionar uma chave Pix
       addPixKey({
@@ -114,7 +118,7 @@ describe('PixStore', () => {
         isPrimary: true,
       });
 
-      const pixKeyId = pixKeys[0].id;
+      const pixKeyId = usePixStore.getState().pixKeys[0].id;
       
       addTransaction({
         pixKeyId,
@@ -124,6 +128,7 @@ describe('PixStore', () => {
         status: 'pending',
       });
 
+      const { transactions } = usePixStore.getState();
       expect(transactions).toHaveLength(1);
       expect(transactions[0]).toMatchObject({
         pixKeyId,
@@ -139,8 +144,6 @@ describe('PixStore', () => {
         addPixKey, 
         addTransaction, 
         updateTransactionStatus, 
-        transactions, 
-        pixKeys 
       } = usePixStore.getState();
       
       addPixKey({
@@ -150,7 +153,7 @@ describe('PixStore', () => {
         isPrimary: true,
       });
 
-      const pixKeyId = pixKeys[0].id;
+      const pixKeyId = usePixStore.getState().pixKeys[0].id;
       
       addTransaction({
         pixKeyId,
@@ -160,10 +163,10 @@ describe('PixStore', () => {
         status: 'pending',
       });
 
-      const transactionId = transactions[0].id;
+      const transactionId = usePixStore.getState().transactions[0].id;
       updateTransactionStatus(transactionId, 'completed');
 
-      expect(transactions[0].status).toBe('completed');
+      expect(usePixStore.getState().transactions[0].status).toBe('completed');
     });
 
     it('should get transactions by key id', () => {
@@ -171,7 +174,6 @@ describe('PixStore', () => {
         addPixKey, 
         addTransaction, 
         getTransactionsByKeyId, 
-        pixKeys 
       } = usePixStore.getState();
       
       addPixKey({
@@ -181,7 +183,7 @@ describe('PixStore', () => {
         isPrimary: true,
       });
 
-      const pixKeyId = pixKeys[0].id;
+      const pixKeyId = usePixStore.getState().pixKeys[0].id;
       
       addTransaction({
         pixKeyId,

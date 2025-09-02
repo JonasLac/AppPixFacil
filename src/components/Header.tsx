@@ -9,7 +9,7 @@ const Header = () => {
   const location = useLocation();
 
   const handleHomeClick = () => {
-    if (window.location.pathname === '/') {
+    if (location.pathname === '/') {
       // Se já estiver na home, scroll para o topo e força dashboard
       window.scrollTo({ top: 0, behavior: 'smooth' });
       navigate('/?view=dashboard', { replace: true });

@@ -1,9 +1,12 @@
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Share } from "lucide-react";
 import { PixKey } from "./PixKeyForm";
 import { toast } from "@/hooks/use-toast";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface QRDisplayProps {
   qrCodeUrl: string;
@@ -14,6 +17,14 @@ interface QRDisplayProps {
 }
 
 const QRDisplay = ({ qrCodeUrl, amount, description, selectedKey, onNewQRCode }: QRDisplayProps) => {
+  const [imageLoading, setImageLoading] = useState(true);
+  const [sharing, setSharing] = useState(false);
+
+  useEffect(() => {
+    // Reset loading state when a new QR is generated
+    setImageLoading(true);
+  }, [qrCodeUrl]);
+
   const shareQRCode = async () => {
     const shareData = {
       title: "QR Code Pix",
@@ -22,6 +33,7 @@ const QRDisplay = ({ qrCodeUrl, amount, description, selectedKey, onNewQRCode }:
     };
 
     try {
+      setSharing(true);
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
         toast({
@@ -51,6 +63,8 @@ const QRDisplay = ({ qrCodeUrl, amount, description, selectedKey, onNewQRCode }:
           variant: "destructive",
         });
       }
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -72,7 +86,19 @@ const QRDisplay = ({ qrCodeUrl, amount, description, selectedKey, onNewQRCode }:
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
-          <img src={qrCodeUrl} alt="QR Code Pix" className="w-64 h-64 mx-auto" />
+          {imageLoading && (
+            <div className="flex flex-col items-center justify-center w-64 h-64">
+              <Skeleton className="w-64 h-64 rounded" />
+              <span className="mt-3 text-sm text-muted-foreground">Gerando QR...</span>
+            </div>
+          )}
+          <img
+            src={qrCodeUrl}
+            alt="QR Code Pix"
+            onLoad={() => setImageLoading(false)}
+            onError={() => setImageLoading(false)}
+            className={`w-64 h-64 mx-auto ${imageLoading ? 'hidden' : 'block'}`}
+          />
         </div>
         
         <div className="bg-pix-gradient-light p-4 rounded-lg">
@@ -85,17 +111,20 @@ const QRDisplay = ({ qrCodeUrl, amount, description, selectedKey, onNewQRCode }:
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button 
+          <LoadingButton 
             onClick={shareQRCode}
+            loading={sharing}
+            loadingText="Compartilhando..."
             className="w-full sm:flex-1 bg-pix-gradient hover:bg-pix-green-dark"
           >
             <Share className="w-4 h-4 mr-2" />
             Compartilhar
-          </Button>
+          </LoadingButton>
           <Button 
             variant="outline" 
             onClick={onNewQRCode}
             className="w-full sm:flex-1"
+            disabled={sharing}
           >
             Novo QR Code
           </Button>

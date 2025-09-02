@@ -63,6 +63,7 @@ interface PixStore {
   cancelQR: (id: string, reason: string) => void;
   getQRHistory: () => QRCodeHistory[];
   searchQRHistory: (query: string) => QRCodeHistory[];
+  deleteQRHistory: (id: string) => void;
   
   // Ações de Estado
   setOfflineStatus: (isOffline: boolean) => void;
@@ -101,11 +102,17 @@ export const usePixStore = create<PixStore>()(
       },
 
       updatePixKey: (id, updates) => {
-        set((state) => ({
-          pixKeys: state.pixKeys.map(key => 
-            key.id === id ? { ...key, ...updates } : key
-          )
-        }));
+        set((state) => {
+          const settingPrimary = updates.isPrimary === true;
+          const pixKeys = state.pixKeys.map(key => {
+            if (key.id === id) {
+              return { ...key, ...updates };
+            }
+            // Se estamos definindo esta chave como principal, desmarca as outras
+            return settingPrimary ? { ...key, isPrimary: false } : key;
+          });
+          return { pixKeys };
+        });
       },
 
       deletePixKey: (id) => {
@@ -225,6 +232,12 @@ export const usePixStore = create<PixStore>()(
         );
       },
 
+      deleteQRHistory: (id) => {
+        set((state) => ({
+          qrHistory: state.qrHistory.filter(qr => qr.id !== id)
+        }));
+      },
+
       // Ações de Estado
       setOfflineStatus: (isOffline) => {
         set({ isOffline });
@@ -242,6 +255,54 @@ export const usePixStore = create<PixStore>()(
     {
       name: 'pix-store',
       version: 1,
+      migrate: (persistedState: unknown, _version) => {
+        const state = (persistedState as Record<string, unknown>) ?? {};
+
+        const safeArray = <T>(arr: unknown): T[] => (Array.isArray(arr) ? (arr as T[]) : []);
+
+        type UnknownRecord = Record<string, unknown>;
+
+        const pixKeys: PixKey[] = safeArray<UnknownRecord>((state as UnknownRecord)['pixKeys']).map((k) => ({
+          id: String((k['id'] as unknown) ?? Date.now().toString()),
+          type: String((k['type'] as unknown) ?? 'manual') as PixKey['type'],
+          value: String((k['value'] as unknown) ?? ''),
+          name: String((k['name'] as unknown) ?? (k['label'] as unknown) ?? ''),
+          isPrimary: Boolean(k['isPrimary']),
+          createdAt: String((k['createdAt'] as unknown) ?? new Date().toISOString()),
+        }));
+
+        const transactions: PixTransaction[] = safeArray<UnknownRecord>((state as UnknownRecord)['transactions']).map((t) => ({
+          id: String((t['id'] as unknown) ?? Date.now().toString()),
+          pixKeyId: String((t['pixKeyId'] as unknown) ?? ''),
+          amount: String((t['amount'] as unknown) ?? '0'),
+          description: String((t['description'] as unknown) ?? ''),
+          qrCode: String((t['qrCode'] as unknown) ?? ''),
+          createdAt: String((t['createdAt'] as unknown) ?? new Date().toISOString()),
+          status: String((t['status'] as unknown) ?? 'pending') as PixTransaction['status'],
+        }));
+
+        const qrHistory: QRCodeHistory[] = safeArray<UnknownRecord>((state as UnknownRecord)['qrHistory']).map((q) => ({
+          id: String((q['id'] as unknown) ?? Date.now().toString()),
+          pixKeyId: String((q['pixKeyId'] as unknown) ?? ''),
+          pixKeyValue: String((q['pixKeyValue'] as unknown) ?? ''),
+          pixKeyName: String((q['pixKeyName'] as unknown) ?? ''),
+          amount: String((q['amount'] as unknown) ?? '0'),
+          description: String((q['description'] as unknown) ?? ''),
+          qrCode: String((q['qrCode'] as unknown) ?? ''),
+          pixCode: String((q['pixCode'] as unknown) ?? ''),
+          createdAt: String((q['createdAt'] as unknown) ?? new Date().toISOString()),
+          isReceived: Boolean(q['isReceived']),
+          isCancelled: Boolean(q['isCancelled']),
+          cancellationReason: typeof q['cancellationReason'] === 'string' ? (q['cancellationReason'] as string) : undefined,
+        }));
+
+        return {
+          pixKeys,
+          transactions,
+          qrHistory,
+          isOffline: Boolean((state as UnknownRecord)['isOffline']),
+        } as PixStore;
+      },
     }
   )
 );

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,8 +14,11 @@ interface PaymentFormProps {
 const PaymentForm = ({ onGenerateQR }: PaymentFormProps) => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (loading) return;
+
     if (!amount || parseFloat(amount) <= 0) {
       toast({
         title: "Erro",
@@ -25,7 +28,14 @@ const PaymentForm = ({ onGenerateQR }: PaymentFormProps) => {
       return;
     }
 
-    onGenerateQR(amount, description);
+    try {
+      setLoading(true);
+      // Padroniza para 2 casas decimais para manter consistência
+      const formattedAmount = parseFloat(amount).toFixed(2);
+      onGenerateQR(formattedAmount, description);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,14 +70,16 @@ const PaymentForm = ({ onGenerateQR }: PaymentFormProps) => {
           />
         </div>
 
-        <Button
+        <LoadingButton
           onClick={handleSubmit}
+          loading={loading}
+          loadingText="Gerando..."
           className="w-full bg-pix-gradient hover:bg-pix-green-dark text-lg py-6"
           disabled={!amount}
         >
           <QrCode className="w-5 h-5 mr-2" />
           Gerar QR Code Pix
-        </Button>
+        </LoadingButton>
       </CardContent>
     </Card>
   );
